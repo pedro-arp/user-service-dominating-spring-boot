@@ -8,6 +8,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class UserPutRequest {
+    private Long id;
     private String firstName;
     private String lastname;
     private String email;

@@ -10,11 +10,13 @@ import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
 
@@ -59,6 +61,34 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("findById() return user found by id")
+    public void findById_ReturnUserById_WhenSuccessful() throws Exception {
+        var id = 1L;
+
+        var response = fileUtils.readResourceFile("user/get-user-by-id-200.json");
+
+        var userFound = userUtils.newUserList().stream().filter(user -> user.getId().equals(id)).findFirst().orElse(null);
+
+        BDDMockito.when(service.findById(id)).thenReturn(userFound);
+
+        mockMvc.perform(MockMvcRequestBuilders.get(URL + "/{id}", id)).andDo(MockMvcResultHandlers.print()).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.content().json(response));
+
+    }
+
+
+    @Test
+    @DisplayName("findById() throw ResponseStatusException when no user is found")
+    public void findById_ReturnResponseStatusException_WhenUserNotFound() throws Exception {
+
+        var id = 99L;
+
+        BDDMockito.when(service.findById(ArgumentMatchers.any())).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        mockMvc.perform(MockMvcRequestBuilders.get(URL + "/{id}", id)).andDo(MockMvcResultHandlers.print()).andExpect(MockMvcResultMatchers.status().isNotFound());
+
+    }
+
+    @Test
     @DisplayName("save() Create User")
     public void save_CreateUser_WhenSuccessful() throws Exception {
 
@@ -79,18 +109,41 @@ class UserControllerTest {
     @DisplayName("delete() Remove User")
     public void delete_RemoveUser_WhenSuccessful() throws Exception {
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(URL + "/{id}", 1L))
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
+        BDDMockito.doNothing().when(service).delete(ArgumentMatchers.any());
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(URL + "/{id}", 1L)).andDo(MockMvcResultHandlers.print()).andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
     @Test
     @DisplayName("delete() throw ResponseStatusException no anime is found")
     public void delete_ThrowResponseStatusException_WhenIsNotFound() throws Exception {
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(URL + "/{id}", 9999L))
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
+        var id = 9999L;
+
+        BDDMockito.doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(service).delete(id);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(URL + "/{id}", id)).andDo(MockMvcResultHandlers.print()).andExpect(MockMvcResultMatchers.status().isNotFound());
+
+    }
+
+    @Test
+    @DisplayName("update() Update User")
+    public void update_UpdateUser_WhenSuccessful() throws Exception {
+
+        var request = fileUtils.readResourceFile("user/put-request-user-200.json");
+
+        mockMvc.perform(MockMvcRequestBuilders.put(URL).content(request).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultHandlers.print()).andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("update() Update User throws Exception when User not Found")
+    public void update_UpdateUser_ThrowsException() throws Exception {
+
+        BDDMockito.doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(service).update(ArgumentMatchers.any());
+
+        var request = fileUtils.readResourceFile("user/put-request-user-404.json");
+
+        mockMvc.perform(MockMvcRequestBuilders.put(URL).content(request).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultHandlers.print()).andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
 }

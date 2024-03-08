@@ -20,8 +20,7 @@ public class UserService {
     }
 
     public User findById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Anime not found"));
+        return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
     public User save(User user) {
@@ -33,6 +32,17 @@ public class UserService {
         var userToDelete = findById(id);
 
         repository.delete(userToDelete);
+    }
+
+    public void update(User userToUpdate) {
+
+        AssertUserExists(userToUpdate);
+
+        repository.update(userToUpdate);
+    }
+
+    private void AssertUserExists(User user) {
+        findById(user.getId());
     }
 
 }

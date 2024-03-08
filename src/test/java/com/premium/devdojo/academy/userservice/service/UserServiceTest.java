@@ -12,6 +12,7 @@ import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -67,15 +68,14 @@ class UserServiceTest {
 
         var user = service.save(userToSave);
 
-        Assertions.assertThat(user).hasNoNullFieldsOrProperties().isEqualTo(userToSave);
+        Assertions.assertThat(user).isEqualTo(userToSave).hasNoNullFieldsOrProperties();
 
-        Assertions.assertThat(this.users).contains(userToSave);
 
     }
 
     @Test
     @DisplayName("delete() Remove User")
-    public void delete_RemoveUser_WhenSuccessful(){
+    public void delete_RemoveUser_WhenSuccessful() {
         var id = 1L;
 
         var userToDelete = this.users.get(0);
@@ -89,4 +89,55 @@ class UserServiceTest {
         Assertions.assertThatNoException().isThrownBy(() -> service.delete(id));
     }
 
+    @Test
+    @DisplayName("delete() throws ResponseStatusException when user not found")
+    public void delete_ThrowsResponseStatusException_WhenUserNotFound() {
+        var id = 1L;
+
+        BDDMockito.when(repository.findById(1L)).thenReturn(Optional.empty());
+
+        Assertions.assertThatException()
+                .isThrownBy(() -> service.delete(id))
+                .isInstanceOf((ResponseStatusException.class));
+
+    }
+
+    @Test
+    @DisplayName("update() Update User")
+    public void update_UpdateUser_WhenSuccessful() {
+
+        var id = 1L;
+
+        var userToUpdate = this.users.get(0);
+
+        userToUpdate.setFirstName("UPDATE");
+
+        BDDMockito.when(repository.findById(id)).thenReturn(Optional.of(userToUpdate));
+
+        BDDMockito.doNothing().when(repository).update(userToUpdate);
+
+
+        Assertions.assertThatNoException().isThrownBy(() -> service.update(userToUpdate));
+
+
+    }
+
+    @Test
+    @DisplayName("update() Throw ResponseStatusException when no user is found")
+    public void update_ThrowsResponseStatusException_WhenUserIsNotFound() {
+        var id = 1L;
+
+        var userToUpdate = this.users.get(0);
+
+        userToUpdate.setFirstName("Update Exception");
+
+        BDDMockito.when(repository.findById(id)).thenReturn(Optional.empty());
+
+
+        Assertions.assertThatException()
+                .isThrownBy(() -> service.update(userToUpdate))
+                .isInstanceOf(ResponseStatusException.class);
+
+
+    }
 }

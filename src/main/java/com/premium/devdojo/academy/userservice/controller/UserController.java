@@ -2,6 +2,7 @@ package com.premium.devdojo.academy.userservice.controller;
 
 import com.premium.devdojo.academy.userservice.mapper.UserMapper;
 import com.premium.devdojo.academy.userservice.request.UserPostRequest;
+import com.premium.devdojo.academy.userservice.request.UserPutRequest;
 import com.premium.devdojo.academy.userservice.response.UserGetResponse;
 import com.premium.devdojo.academy.userservice.response.UserPostResponse;
 import com.premium.devdojo.academy.userservice.service.UserService;
@@ -27,6 +28,8 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<UserGetResponse>> list() {
 
+        log.debug("Request received to list all users");
+
         var users = service.findAll();
 
         var response = mapper.usersToGetResponseList(users);
@@ -38,6 +41,8 @@ public class UserController {
     @GetMapping("{id}")
     public ResponseEntity<UserGetResponse> findById(@PathVariable Long id) {
 
+        log.info("Request received find user by id '{}'", id);
+
         var user = service.findById(id);
 
         var response = mapper.toUserGetResponse(user);
@@ -48,6 +53,8 @@ public class UserController {
 
     @PostMapping("post")
     public ResponseEntity<UserPostResponse> save(@RequestBody UserPostRequest request) {
+
+        log.info("Request received save a user '{}'", request);
 
         var user = mapper.toUser(request);
 
@@ -61,7 +68,21 @@ public class UserController {
     @DeleteMapping("{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
 
+        log.info("Request received to delete the user by id '{}'", id);
+
         service.delete(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping
+    public ResponseEntity<Void> update(@RequestBody UserPutRequest request) {
+
+        log.info("Request received to update the user '{}'", request);
+
+        var userToUpdate = mapper.toUser(request);
+
+        service.update(userToUpdate);
 
         return ResponseEntity.noContent().build();
     }
