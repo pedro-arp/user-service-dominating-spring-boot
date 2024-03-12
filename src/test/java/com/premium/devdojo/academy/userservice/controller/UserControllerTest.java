@@ -2,6 +2,7 @@ package com.premium.devdojo.academy.userservice.controller;
 
 import com.premium.devdojo.academy.userservice.commons.FileUtils;
 import com.premium.devdojo.academy.userservice.commons.UserUtils;
+import com.premium.devdojo.academy.userservice.mapper.UserMapperImpl;
 import com.premium.devdojo.academy.userservice.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Collections;
 
 @WebMvcTest(UserController.class)
+@Import({UserMapperImpl.class, UserUtils.class, FileUtils.class})
 class UserControllerTest {
     private static final String URL = "/v1/users";
 
