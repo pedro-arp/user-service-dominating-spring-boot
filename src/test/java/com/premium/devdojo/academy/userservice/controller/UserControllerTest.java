@@ -4,7 +4,9 @@ import com.premium.devdojo.academy.userservice.commons.FileUtils;
 import com.premium.devdojo.academy.userservice.commons.UserUtils;
 import com.premium.devdojo.academy.userservice.mapper.UserMapperImpl;
 import com.premium.devdojo.academy.userservice.service.UserService;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
@@ -41,6 +43,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("findAll() must return a list of all users")
+    @Order(1)
     public void findAll_ReturnUsers_WhenSuccessful() throws Exception {
 
         var response = fileUtils.readResourceFile("user/get-all-users-200.json");
@@ -53,6 +56,8 @@ class UserControllerTest {
 
     @Test
     @DisplayName("findAll() returns empty list when no users are found")
+    @Order(2)
+
     public void findAll_ReturnsEmptyList_WhenNoUsersFound() throws Exception {
 
         var response = fileUtils.readResourceFile("user/get-all-users-is-empty-list-200.json");
@@ -65,6 +70,8 @@ class UserControllerTest {
 
     @Test
     @DisplayName("findById() return user found by id")
+    @Order(3)
+
     public void findById_ReturnUserById_WhenSuccessful() throws Exception {
         var id = 1L;
 
@@ -81,6 +88,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("findById() throw ResponseStatusException when no user is found")
+    @Order(4)
     public void findById_ReturnResponseStatusException_WhenUserNotFound() throws Exception {
 
         var id = 99L;
@@ -93,6 +101,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("save() Create User")
+    @Order(5)
     public void save_CreateUser_WhenSuccessful() throws Exception {
 
         var request = fileUtils.readResourceFile("user/post-request-user-201.json");
@@ -110,6 +119,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("delete() Remove User")
+    @Order(6)
     public void delete_RemoveUser_WhenSuccessful() throws Exception {
 
         BDDMockito.doNothing().when(service).delete(ArgumentMatchers.any());
@@ -119,6 +129,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("delete() throw ResponseStatusException no anime is found")
+    @Order(7)
     public void delete_ThrowResponseStatusException_WhenIsNotFound() throws Exception {
 
         var id = 9999L;
@@ -131,6 +142,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("update() Update User")
+    @Order(8)
     public void update_UpdateUser_WhenSuccessful() throws Exception {
 
         var request = fileUtils.readResourceFile("user/put-request-user-200.json");
@@ -140,6 +152,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("update() Update User throws Exception when User not Found")
+    @Order(9)
     public void update_UpdateUser_ThrowsException() throws Exception {
 
         var request = fileUtils.readResourceFile("user/put-request-user-404.json");
@@ -147,6 +160,54 @@ class UserControllerTest {
         BDDMockito.doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(service).update(ArgumentMatchers.any());
 
         mockMvc.perform(MockMvcRequestBuilders.put(URL).content(request).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultHandlers.print()).andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("save() returns  bad request when fields are empty")
+    @Order(10)
+    public void save_ReturnsBadRequest_WhenFieldsAreEmpty() throws Exception {
+
+        var request = fileUtils.readResourceFile("user/post-request-user-empty-fields-400.json");
+
+        var mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(URL + "/post")
+                        .content(request).contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andReturn();
+
+        var resolvedException = mvcResult.getResolvedException();
+
+        Assertions.assertThat(resolvedException).isNotNull();
+
+        var firstNameError = "The field 'fistName' is required";
+        var lastNameError = "The field 'lastName' is required";
+        var emailError = "The email format is not valid";
+
+        Assertions.assertThat(resolvedException.getMessage()).contains(firstNameError, lastNameError, emailError);
+    }
+
+    @Test
+    @DisplayName("save() returns  bad request when fields are blank")
+    @Order(10)
+    public void save_ReturnsBadRequest_WhenFieldsAreBlank() throws Exception {
+
+        var request = fileUtils.readResourceFile("user/post-request-user-blank-fields-400.json");
+
+        var mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(URL + "/post")
+                        .content(request).contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andReturn();
+
+        var resolvedException = mvcResult.getResolvedException();
+
+        Assertions.assertThat(resolvedException).isNotNull();
+
+        var firstNameError = "The field 'fistName' is required";
+        var lastNameError = "The field 'lastName' is required";
+        var emailError = "The email format is not valid";
+
+        Assertions.assertThat(resolvedException.getMessage()).contains(firstNameError, lastNameError, emailError);
     }
 
 }
