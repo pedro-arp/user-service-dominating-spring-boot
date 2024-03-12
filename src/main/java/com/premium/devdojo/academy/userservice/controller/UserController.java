@@ -6,6 +6,7 @@ import com.premium.devdojo.academy.userservice.request.UserPutRequest;
 import com.premium.devdojo.academy.userservice.response.UserGetResponse;
 import com.premium.devdojo.academy.userservice.response.UserPostResponse;
 import com.premium.devdojo.academy.userservice.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -52,7 +53,7 @@ public class UserController {
 
 
     @PostMapping("post")
-    public ResponseEntity<UserPostResponse> save(@RequestBody UserPostRequest request) {
+    public ResponseEntity<UserPostResponse> save(@RequestBody @Valid UserPostRequest request) {
 
         log.info("Request received save a user '{}'", request);
 
@@ -76,7 +77,7 @@ public class UserController {
     }
 
     @PutMapping
-    public ResponseEntity<Void> update(@RequestBody UserPutRequest request) {
+    public ResponseEntity<Void> update(@RequestBody @Valid UserPutRequest request) {
 
         log.info("Request received to update the user '{}'", request);
 

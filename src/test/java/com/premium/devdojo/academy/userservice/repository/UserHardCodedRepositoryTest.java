@@ -85,7 +85,7 @@ class UserHardCodedRepositoryTest {
         var userToUpdate = this.users.get(0);
 
         userToUpdate.setFirstName("Updating");
-        userToUpdate.setLastname("ing");
+        userToUpdate.setLastName("ing");
         userToUpdate.setEmail("updating@hotmail.com");
 
         repository.update(userToUpdate);
