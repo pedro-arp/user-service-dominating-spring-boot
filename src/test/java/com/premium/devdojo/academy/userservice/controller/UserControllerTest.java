@@ -142,9 +142,9 @@ class UserControllerTest {
     @DisplayName("update() Update User throws Exception when User not Found")
     public void update_UpdateUser_ThrowsException() throws Exception {
 
-        BDDMockito.doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(service).update(ArgumentMatchers.any());
-
         var request = fileUtils.readResourceFile("user/put-request-user-404.json");
+
+        BDDMockito.doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(service).update(ArgumentMatchers.any());
 
         mockMvc.perform(MockMvcRequestBuilders.put(URL).content(request).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultHandlers.print()).andExpect(MockMvcResultMatchers.status().isNotFound());
     }
