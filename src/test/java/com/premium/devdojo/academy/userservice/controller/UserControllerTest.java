@@ -8,6 +8,9 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 
 @WebMvcTest(UserController.class)
 @Import({UserMapperImpl.class, UserUtils.class, FileUtils.class})
@@ -162,36 +167,13 @@ class UserControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.put(URL).content(request).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultHandlers.print()).andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("postUserBadRequestSourceFiles")
     @DisplayName("save() returns  bad request when fields are empty")
     @Order(10)
-    public void save_ReturnsBadRequest_WhenFieldsAreEmpty() throws Exception {
+    public void save_ReturnsBadRequest_WhenFieldsAreEmpty(String fileName, List<String> errors) throws Exception {
 
-        var request = fileUtils.readResourceFile("user/post-request-user-empty-fields-400.json");
-
-        var mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(URL + "/post")
-                        .content(request).contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andReturn();
-
-        var resolvedException = mvcResult.getResolvedException();
-
-        Assertions.assertThat(resolvedException).isNotNull();
-
-        var firstNameError = "The field 'fistName' is required";
-        var lastNameError = "The field 'lastName' is required";
-        var emailError = "The email format is not valid";
-
-        Assertions.assertThat(resolvedException.getMessage()).contains(firstNameError, lastNameError, emailError);
-    }
-
-    @Test
-    @DisplayName("save() returns  bad request when fields are blank")
-    @Order(10)
-    public void save_ReturnsBadRequest_WhenFieldsAreBlank() throws Exception {
-
-        var request = fileUtils.readResourceFile("user/post-request-user-blank-fields-400.json");
+        var request = fileUtils.readResourceFile("user/%s".formatted(fileName));
 
         var mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(URL + "/post")
                         .content(request).contentType(MediaType.APPLICATION_JSON))
@@ -203,11 +185,22 @@ class UserControllerTest {
 
         Assertions.assertThat(resolvedException).isNotNull();
 
+        Assertions.assertThat(resolvedException.getMessage()).contains(errors);
+    }
+
+    private static Stream<Arguments> postUserBadRequestSourceFiles() {
+
         var firstNameError = "The field 'fistName' is required";
         var lastNameError = "The field 'lastName' is required";
-        var emailError = "The email format is not valid";
+        var emailNameError = "The email format is not valid";
 
-        Assertions.assertThat(resolvedException.getMessage()).contains(firstNameError, lastNameError, emailError);
+        var allErrors = List.of(firstNameError, lastNameError, emailNameError);
+        var emailError = Collections.singletonList(emailNameError);
+
+        return Stream.of(Arguments.of("post-request-user-blank-fields-400.json", allErrors),
+                Arguments.of("post-request-user-empty-fields-400.json", allErrors),
+                Arguments.of("post-request-user-invalid-email-field-400.json", emailError));
     }
+
 
 }
