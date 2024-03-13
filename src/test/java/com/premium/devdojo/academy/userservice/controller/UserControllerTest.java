@@ -169,17 +169,13 @@ class UserControllerTest {
 
     @ParameterizedTest
     @MethodSource("postUserBadRequestSourceFiles")
-    @DisplayName("save() returns  bad request when fields are empty")
+    @DisplayName("save() returns  bad request when fields are incorrect")
     @Order(10)
-    public void save_ReturnsBadRequest_WhenFieldsAreEmpty(String fileName, List<String> errors) throws Exception {
+    public void save_ReturnsBadRequest_WhenFieldsAreIncorrect(String fileName, List<String> errors) throws Exception {
 
         var request = fileUtils.readResourceFile("user/%s".formatted(fileName));
 
-        var mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(URL + "/post")
-                        .content(request).contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andReturn();
+        var mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(URL + "/post").content(request).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultHandlers.print()).andExpect(MockMvcResultMatchers.status().isBadRequest()).andReturn();
 
         var resolvedException = mvcResult.getResolvedException();
 
@@ -197,9 +193,41 @@ class UserControllerTest {
         var allErrors = List.of(firstNameError, lastNameError, emailNameError);
         var emailError = Collections.singletonList(emailNameError);
 
-        return Stream.of(Arguments.of("post-request-user-blank-fields-400.json", allErrors),
-                Arguments.of("post-request-user-empty-fields-400.json", allErrors),
-                Arguments.of("post-request-user-invalid-email-field-400.json", emailError));
+        return Stream.of(Arguments.of("post-request-user-blank-fields-400.json", allErrors), Arguments.of("post-request-user-empty-fields-400.json", allErrors), Arguments.of("post-request-user-invalid-email-field-400.json", emailError));
+    }
+
+    @ParameterizedTest
+    @DisplayName("update() returns bad request when fields are incorrect")
+    @MethodSource("putUserBadRequestSourceFiles")
+    @Order(11)
+    public void update_ReturnsBadRequest_WhenFieldsAreIncorrect(String fileName, List<String> errors) throws Exception {
+
+        var request = fileUtils.readResourceFile("user/%s".formatted(fileName));
+
+        var mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(URL).content(request).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultHandlers.print()).andExpect(MockMvcResultMatchers.status().isBadRequest()).andReturn();
+
+        var resolvedException = mvcResult.getResolvedException();
+
+        Assertions.assertThat(resolvedException).isNotNull();
+
+        Assertions.assertThat(resolvedException.getMessage()).contains(errors);
+
+
+    }
+
+    private static Stream<Arguments> putUserBadRequestSourceFiles() {
+
+        var firstNameError = "The field 'fistName' is required";
+        var lastNameError = "The field 'lastName' is required";
+        var emailNameError = "The email format is not valid";
+
+        var allErrors = List.of(firstNameError, lastNameError, emailNameError);
+        var emailError = Collections.singletonList(emailNameError);
+
+        return Stream.of(
+                Arguments.of("put-request-user-blank-fields-400.json", allErrors)
+                , Arguments.of("put-request-user-empty-fields-400.json", allErrors)
+                , Arguments.of("put-request-user-invalid-email-field-400.json", emailError));
     }
 
 
