@@ -169,9 +169,9 @@ class UserControllerTest {
 
     @ParameterizedTest
     @MethodSource("postUserBadRequestSourceFiles")
-    @DisplayName("save() returns  bad request when fields are incorrect")
+    @DisplayName("save() returns  bad request when fields are invalid")
     @Order(10)
-    public void save_ReturnsBadRequest_WhenFieldsAreIncorrect(String fileName, List<String> errors) throws Exception {
+    public void save_ReturnsBadRequest_WhenFieldsAreInvalid(String fileName, List<String> errors) throws Exception {
 
         var request = fileUtils.readResourceFile("user/%s".formatted(fileName));
 
@@ -197,10 +197,10 @@ class UserControllerTest {
     }
 
     @ParameterizedTest
-    @DisplayName("update() returns bad request when fields are incorrect")
+    @DisplayName("update() returns bad request when fields are invalid")
     @MethodSource("putUserBadRequestSourceFiles")
     @Order(11)
-    public void update_ReturnsBadRequest_WhenFieldsAreIncorrect(String fileName, List<String> errors) throws Exception {
+    public void update_ReturnsBadRequest_WhenFieldsAreInvalid(String fileName, List<String> errors) throws Exception {
 
         var request = fileUtils.readResourceFile("user/%s".formatted(fileName));
 
@@ -211,7 +211,6 @@ class UserControllerTest {
         Assertions.assertThat(resolvedException).isNotNull();
 
         Assertions.assertThat(resolvedException.getMessage()).contains(errors);
-
 
     }
 
