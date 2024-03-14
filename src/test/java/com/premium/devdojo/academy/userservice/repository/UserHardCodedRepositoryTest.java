@@ -4,9 +4,7 @@ package com.premium.devdojo.academy.userservice.repository;
 import com.premium.devdojo.academy.userservice.commons.UserUtils;
 import com.premium.devdojo.academy.userservice.domain.User;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
@@ -16,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class UserHardCodedRepositoryTest {
 
     private List<User> users;
