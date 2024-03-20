@@ -4,6 +4,7 @@ import academy.devdojo.domain.User;
 import academy.devdojo.exception.NotFoundException;
 import academy.devdojo.repository.UserHardCodedRepository;
 import academy.devdojo.commons.UserUtils;
+import academy.devdojo.repository.UserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +24,8 @@ class UserServiceTest {
 
     @Mock
     private UserHardCodedRepository repository;
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private UserUtils userUtils;
@@ -38,7 +41,7 @@ class UserServiceTest {
     @Test
     @DisplayName("findAll()")
     public void findAll_WhenSuccessful() {
-        BDDMockito.when(repository.findAll()).thenReturn(this.users);
+        BDDMockito.when(userRepository.findAll()).thenReturn(this.users);
         var test = service.findAll();
         Assertions.assertThat(test).hasSameElementsAs(this.users);
     }
