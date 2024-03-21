@@ -52,7 +52,7 @@ public class UserController {
     }
 
 
-    @PostMapping("post")
+    @PostMapping
     public ResponseEntity<UserPostResponse> save(@RequestBody @Valid UserPostRequest request) {
 
         log.info("Request received save a user '{}'", request);

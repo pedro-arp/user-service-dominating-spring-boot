@@ -1,8 +1,7 @@
 package academy.devdojo.service;
 
-import academy.devdojo.exception.NotFoundException;
 import academy.devdojo.domain.User;
-import academy.devdojo.repository.UserHardCodedRepository;
+import academy.devdojo.exception.NotFoundException;
 import academy.devdojo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,11 +12,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserHardCodedRepository repository;
-    private final UserRepository userRepository;
+    private final UserRepository repository;
 
     public List<User> findAll() {
-        return userRepository.findAll();
+        return repository.findAll();
     }
 
     public User findById(Long id) {
@@ -39,7 +37,7 @@ public class UserService {
 
         AssertUserExists(userToUpdate);
 
-        repository.update(userToUpdate);
+        repository.save(userToUpdate);
     }
 
     private void AssertUserExists(User user) {

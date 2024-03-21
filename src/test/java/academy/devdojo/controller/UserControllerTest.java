@@ -125,7 +125,7 @@ class UserControllerTest {
 
         BDDMockito.when(service.save(userToSave)).thenReturn(userToSave);
 
-        mockMvc.perform(MockMvcRequestBuilders.post(URL + "/post").content(request).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultHandlers.print()).andExpect(MockMvcResultMatchers.status().isCreated()).andExpect(MockMvcResultMatchers.content().json(response));
+        mockMvc.perform(MockMvcRequestBuilders.post(URL).content(request).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultHandlers.print()).andExpect(MockMvcResultMatchers.status().isCreated()).andExpect(MockMvcResultMatchers.content().json(response));
     }
 
     @Test
@@ -188,7 +188,7 @@ class UserControllerTest {
 
         var request = fileUtils.readResourceFile("user/%s".formatted(fileName));
 
-        var mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(URL + "/post").content(request).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultHandlers.print()).andExpect(MockMvcResultMatchers.status().isBadRequest()).andReturn();
+        var mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(URL ).content(request).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultHandlers.print()).andExpect(MockMvcResultMatchers.status().isBadRequest()).andReturn();
 
         var resolvedException = mvcResult.getResolvedException();
 

@@ -1,9 +1,8 @@
 package academy.devdojo.service;
 
+import academy.devdojo.commons.UserUtils;
 import academy.devdojo.domain.User;
 import academy.devdojo.exception.NotFoundException;
-import academy.devdojo.repository.UserHardCodedRepository;
-import academy.devdojo.commons.UserUtils;
 import academy.devdojo.repository.UserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
@@ -23,9 +22,7 @@ class UserServiceTest {
     private List<User> users;
 
     @Mock
-    private UserHardCodedRepository repository;
-    @Mock
-    private UserRepository userRepository;
+    private UserRepository repository;
 
     @InjectMocks
     private UserUtils userUtils;
@@ -41,7 +38,7 @@ class UserServiceTest {
     @Test
     @DisplayName("findAll()")
     public void findAll_WhenSuccessful() {
-        BDDMockito.when(userRepository.findAll()).thenReturn(this.users);
+        BDDMockito.when(repository.findAll()).thenReturn(this.users);
         var test = service.findAll();
         Assertions.assertThat(test).hasSameElementsAs(this.users);
     }
@@ -116,7 +113,7 @@ class UserServiceTest {
 
         BDDMockito.when(repository.findById(id)).thenReturn(Optional.of(userToUpdate));
 
-        BDDMockito.doNothing().when(repository).update(userToUpdate);
+        BDDMockito.when(repository.save(userToUpdate)).thenReturn(userToUpdate);
 
 
         Assertions.assertThatNoException().isThrownBy(() -> service.update(userToUpdate));
