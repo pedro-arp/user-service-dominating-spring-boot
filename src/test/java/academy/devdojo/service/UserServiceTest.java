@@ -2,6 +2,7 @@ package academy.devdojo.service;
 
 import academy.devdojo.commons.UserUtils;
 import academy.devdojo.domain.User;
+import academy.devdojo.exception.InvalidEmailException;
 import academy.devdojo.exception.NotFoundException;
 import academy.devdojo.repository.UserRepository;
 import org.assertj.core.api.Assertions;
@@ -63,14 +64,16 @@ class UserServiceTest {
 
         var userToSave = userUtils.userToSave();
 
+        BDDMockito.when(repository.findByEmail(userToSave.getEmail())).thenReturn(Optional.empty());
+
         BDDMockito.when(repository.save(userToSave)).thenReturn(userToSave);
 
         var user = service.save(userToSave);
 
         Assertions.assertThat(user).isEqualTo(userToSave).hasNoNullFieldsOrProperties();
 
-
     }
+
 
     @Test
     @DisplayName("delete() Remove User")
@@ -95,9 +98,7 @@ class UserServiceTest {
 
         BDDMockito.when(repository.findById(1L)).thenReturn(Optional.empty());
 
-        Assertions.assertThatException()
-                .isThrownBy(() -> service.delete(id))
-                .isInstanceOf((NotFoundException.class));
+        Assertions.assertThatException().isThrownBy(() -> service.delete(id)).isInstanceOf((NotFoundException.class));
 
     }
 
@@ -107,9 +108,11 @@ class UserServiceTest {
 
         var id = 1L;
 
-        var userToUpdate = this.users.get(0);
+        var userToUpdate = this.users.get(0).withFirstName("UPDATE");
 
-        userToUpdate.setFirstName("UPDATE");
+        var savedUser = this.users.get(0);
+
+        BDDMockito.when(repository.findByEmail(userToUpdate.getEmail())).thenReturn(Optional.of(savedUser));
 
         BDDMockito.when(repository.findById(id)).thenReturn(Optional.of(userToUpdate));
 
@@ -126,17 +129,45 @@ class UserServiceTest {
     public void update_ThrowsNotFoundException_WhenUserIsNotFound() {
         var id = 1L;
 
-        var userToUpdate = this.users.get(0);
-
-        userToUpdate.setFirstName("Update Exception");
+        var userToUpdate = this.users.get(0).withFirstName("Update Exception");
 
         BDDMockito.when(repository.findById(id)).thenReturn(Optional.empty());
 
-
-        Assertions.assertThatException()
-                .isThrownBy(() -> service.update(userToUpdate))
-                .isInstanceOf(NotFoundException.class);
-
+        Assertions.assertThatException().isThrownBy(() -> service.update(userToUpdate)).isInstanceOf(NotFoundException.class);
 
     }
+
+    @Test
+    @DisplayName("save() Throws InvalidEmailException when email is already been used")
+    public void save_ThrowsInvalidEmailException_WhenEmailAlreadyBeenUsed() {
+
+        var userEmailExists = this.users.get(0);
+
+        var userToSave = userUtils.userToSave().withEmail(userEmailExists.getEmail());
+
+        BDDMockito.when(repository.findByEmail(userToSave.getEmail())).thenReturn(Optional.of(userEmailExists));
+
+        Assertions.assertThatException().isThrownBy(() -> service.save(userToSave)).isInstanceOf(InvalidEmailException.class);
+
+    }
+
+
+    @Test
+    @DisplayName("update() Throw InvalidEmailException when user is already been used")
+    public void update_ThrowsInvalidEmailException_WhenUserIsAlreadyBeenUsed() {
+        var id = 1L;
+
+        var userToUpdate = this.users.get(0).withFirstName("Naruto");
+
+        var userToUpdate1 = this.users.get(1).withEmail(userToUpdate.getEmail());
+
+        BDDMockito.when(repository.findByEmail(userToUpdate.getEmail())).thenReturn(Optional.of(userToUpdate1));
+
+        BDDMockito.when(repository.findById(id)).thenReturn(Optional.of(userToUpdate));
+
+        Assertions.assertThatException().isThrownBy(() -> service.update(userToUpdate)).isInstanceOf(InvalidEmailException.class);
+
+    }
+
+
 }

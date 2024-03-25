@@ -1,12 +1,11 @@
 package academy.devdojo.service;
 
 import academy.devdojo.domain.User;
+import academy.devdojo.exception.InvalidEmailException;
 import academy.devdojo.exception.NotFoundException;
 import academy.devdojo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -53,10 +52,8 @@ public class UserService {
         repository.findByEmail(email)
                 .ifPresent(userFound -> {
                     if (!userFound.getId().equals(userId)) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email '%s' is already in use".formatted(email));
+                        throw new InvalidEmailException("email '%s' is already in use".formatted(email));
                     }
-
                 });
-
     }
 }
